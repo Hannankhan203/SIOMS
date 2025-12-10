@@ -1,0 +1,31 @@
+@model IEnumerable<SIOMS.Models.LowStockAlert>
+
+<h2>Low Stock Alerts</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Current Stock</th>
+            <th>Minimum Level</th>
+            <th>Alert Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var alert in Model)
+        {
+            <tr>
+                <td>@alert.Product?.Name</td>
+                <td>@alert.CurrentStock</td>
+                <td>@alert.MinimumStockLevel</td>
+                <td>@alert.AlertDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    <form method="post" asp-action="MarkAsResolved" asp-route-id="@alert.AlertId">
+                        <button class="btn btn-success btn-sm">Mark Resolved</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
