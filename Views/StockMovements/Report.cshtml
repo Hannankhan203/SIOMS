@@ -1,0 +1,83 @@
+@model IEnumerable<SIOMS.Models.StockMovement>
+
+@{
+    ViewData["Title"] = "Stock Movement Report";
+}
+
+<h2>Stock Movement Report</h2>
+
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <label>Start Date:</label>
+            <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+        </div>
+        <div class="col-md-4">
+            <label>End Date:</label>
+            <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+        </div>
+        <div class="col-md-4">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn btn-primary form-control">Filter</button>
+        </div>
+    </div>
+</form>
+
+@if (ViewBag.Summary != null)
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <strong>Total Movements:</strong> @ViewBag.Summary.TotalMovements
+                </div>
+                <div class="col-md-3">
+                    <strong>Stock In:</strong> @ViewBag.Summary.TotalInQuantity
+                </div>
+                <div class="col-md-3">
+                    <strong>Stock Out:</strong> @ViewBag.Summary.TotalOutQuantity
+                </div>
+                <div class="col-md-3">
+                    <strong>Total Value:</strong> @((ViewBag.Summary.TotalInValue + ViewBag.Summary.TotalOutValue).ToString("C"))
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Product</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total Value</th>
+            <th>Reference</th>
+            <th>User</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.MovementDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.Product?.Name</td>
+                <td>
+                    <span class="badge bg-@(item.MovementType == "IN" ? "success" : item.MovementType == "OUT" ? "danger" : "info")">
+                        @item.MovementType
+                    </span>
+                </td>
+                <td>@item.Quantity</td>
+                <td>@(item.UnitPrice?.ToString("C") ?? "-")</td>
+                <td>@((item.Quantity * (item.UnitPrice ?? 0)).ToString("C"))</td>
+                <td>@item.ReferenceNumber</td>
+                <td>@item.User?.UserName</td>
+            </tr>
+        }
+    </tbody>
+</table>
