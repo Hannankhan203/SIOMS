@@ -1,0 +1,251 @@
+﻿@model SIOMS.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid">
+    <h1 class="display-4 mb-4"><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Products
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalProducts</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Monthly Sales
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.MonthlySales.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Low Stock Items
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.LowStockItems</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Customers
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalCustomers</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts and Tables -->
+    <div class="row">
+        <!-- Monthly Sales Chart -->
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Monthly Sales Trend</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Low Stock Alerts -->
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-warning">Low Stock Alerts</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.ActiveAlerts.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var alert in Model.ActiveAlerts.Take(5))
+                            {
+                                <a href="@Url.Action("Details", "Products", new { id = alert.ProductId })" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">@alert.ProductName</h6>
+                                        <small>@alert.AlertDate.ToString("MMM dd")</small>
+                                    </div>
+                                    <p class="mb-1">Current: @alert.CurrentStock | Minimum: @alert.MinimumStockLevel</p>
+                                </a>
+                            }
+                        </div>
+                        @if (Model.ActiveAlerts.Count > 5)
+                        {
+                            <div class="text-center mt-2">
+                                <a href="@Url.Action("Index", "LowStockAlerts")" class="btn btn-sm btn-warning">
+                                    View All (@Model.ActiveAlerts.Count)
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted">No low stock alerts</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Selling Products -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Top Selling Products</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Current Stock</th>
+                                    <th>Selling Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in Model.TopSellingProducts)
+                                {
+                                    <tr>
+                                        <td>@product.Name</td>
+                                        <td>@product.Category?.Name</td>
+                                        <td>@product.StockQuantity</td>
+                                        <td>@product.SellingPrice.ToString("C")</td>
+                                        <td>
+                                            @if (product.StockQuantity <= product.MinimumStockLevel)
+                                            {
+                                                <span class="badge bg-warning">Low Stock</span>
+                                            }
+                                            else if (product.StockQuantity == 0)
+                                            {
+                                                <span class="badge bg-danger">Out of Stock</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">In Stock</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                        Quick Sales
+                    </div>
+                    <a asp-controller="SalesOrders" asp-action="Create" 
+                       class="btn btn-success btn-sm mt-2">
+                        <i class="fas fa-cash-register"></i> New Sale
+                    </a>
+                </div>
+                <div class="col-auto">
+                    <i class="fas fa-cash-register fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sales Chart
+        var salesLabels = @Html.Raw(Json.Serialize(Model.MonthlySalesChart.Select(x => x.Key).ToArray()));
+        var salesData = @Html.Raw(Json.Serialize(Model.MonthlySalesChart.Select(x => x.Value).ToArray()));
+        
+        var ctx = document.getElementById('salesChart').getContext('2d');
+        var salesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: 'Sales ($)',
+                    data: salesData,
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverRadius: 5,
+                    lineTension: 0.4
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

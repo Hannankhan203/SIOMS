@@ -1,0 +1,117 @@
+/* Custom styles for SIOMS */
+:root {
+    --primary-color: #4e73df;
+    --success-color: #1cc88a;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --info-color: #36b9cc;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fc;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border-radius: 0.35rem;
+    border: 1px solid #e3e6f0;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+    border-bottom: 1px solid #e3e6f0;
+    background-color: #f8f9fc;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2653d4;
+}
+
+.table th {
+    border-top: none;
+    background-color: #f8f9fc;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Dashboard cards */
+.card.border-left-primary {
+    border-left: 0.25rem solid var(--primary-color) !important;
+}
+
+.card.border-left-success {
+    border-left: 0.25rem solid var(--success-color) !important;
+}
+
+.card.border-left-warning {
+    border-left: 0.25rem solid var(--warning-color) !important;
+}
+
+.card.border-left-info {
+    border-left: 0.25rem solid var(--info-color) !important;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-in-stock {
+    background-color: var(--success-color);
+}
+
+.status-low-stock {
+    background-color: var(--warning-color);
+}
+
+.status-out-of-stock {
+    background-color: var(--danger-color);
+}
+
+/* Action buttons */
+.btn-group .btn {
+    margin-right: 2px;
+}
+
+/* Form styles */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+/* Alert styles */
+.alert-custom {
+    border-left: 4px solid;
+    border-radius: 0.35rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 2px;
+        margin-right: 0;
+    }
+}

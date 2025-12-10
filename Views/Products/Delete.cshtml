@@ -1,0 +1,303 @@
+@model SIOMS.Models.Product
+
+@{
+    ViewData["Title"] = "Delete Product";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-trash-alt text-danger"></i> Delete Product
+        </h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <!-- Warning Alert -->
+    <div class="alert alert-danger shadow mb-4">
+        <div class="d-flex align-items-center">
+            <div class="mr-3">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+            </div>
+            <div>
+                <h4 class="alert-heading mb-1">Warning!</h4>
+                <p class="mb-0">
+                    <strong>Are you sure you want to delete this product?</strong><br>
+                    This action cannot be undone. All stock history and related data will be permanently deleted.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle"></i> Product Details
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Product Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold text-primary mb-3">Product Information</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td width="40%"><strong>Product Name:</strong></td>
+                                    <td>@Model.Name</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>SKU:</strong></td>
+                                    <td>@Model.SKU</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Category:</strong></td>
+                                    <td>@Model.Category?.Name</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Supplier:</strong></td>
+                                    <td>@Model.Supplier?.Name</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Current Stock:</strong></td>
+                                    <td class="font-weight-bold @(Model.StockQuantity > 0 ? "text-danger" : "text-success")">
+                                        @Model.StockQuantity units
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold text-primary mb-3">Pricing Information</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td width="40%"><strong>Buying Price:</strong></td>
+                                    <td>@Model.BuyingPrice.ToString("C")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Selling Price:</strong></td>
+                                    <td>@Model.SellingPrice.ToString("C")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Profit Margin:</strong></td>
+                                    <td class="font-weight-bold @((Model.SellingPrice - Model.BuyingPrice) >= 0 ? "text-success" : "text-danger")">
+                                        @((Model.SellingPrice - Model.BuyingPrice).ToString("C"))
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Created:</strong></td>
+                                    <td>@Model.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Last Updated:</strong></td>
+                                    <td>@(Model.UpdatedDate?.ToString("yyyy-MM-dd") ?? "Never")</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Additional Warnings -->
+                    @if (Model.StockQuantity > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Warning:</strong> This product still has @Model.StockQuantity units in stock.
+                            Deleting it will remove all stock records.
+                        </div>
+                    }
+
+                    <!-- Delete Form -->
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="ProductId" />
+                        
+                        <div class="form-group">
+                            <label for="confirmationText" class="form-label text-danger">
+                                <i class="fas fa-keyboard"></i> Type "DELETE" to confirm
+                            </label>
+                            <input type="text" class="form-control" id="confirmationText" 
+                                   placeholder="Type DELETE here" required 
+                                   oninput="validateConfirmation()">
+                            <small class="form-text text-muted">
+                                This is required to prevent accidental deletion.
+                            </small>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-group mt-4">
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-danger" id="deleteButton" disabled>
+                                    <i class="fas fa-trash-alt"></i> Delete Product
+                                </button>
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="clearForm()">
+                                        <i class="fas fa-undo"></i> Clear
+                                    </button>
+                                    <a asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-outline-primary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-4">
+            <!-- Impact Summary -->
+            <div class="card shadow mb-4 border-left-danger">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-exclamation-circle"></i> What Will Be Deleted
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-danger"></i>
+                            <small>Product record permanently removed</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-danger"></i>
+                            <small>All stock movement history deleted</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-danger"></i>
+                            <small>Sales records referencing this product</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-danger"></i>
+                            <small>Purchase order references removed</small>
+                        </li>
+                        <li>
+                            <i class="fas fa-check text-danger"></i>
+                            <small>All audit trail for this product</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Alternative Actions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-lightbulb"></i> Consider Alternatives
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a asp-action="Edit" asp-route-id="@Model.ProductId" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 text-primary"><i class="fas fa-edit"></i> Edit Product</h6>
+                            </div>
+                            <p class="mb-1 small">Update product details instead of deleting</p>
+                        </a>
+                        <a asp-action="UpdateStock" asp-route-id="@Model.ProductId" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 text-warning"><i class="fas fa-warehouse"></i> Adjust Stock</h6>
+                            </div>
+                            <p class="mb-1 small">Set stock to zero if product is discontinued</p>
+                        </a>
+                        <a asp-action="Details" asp-route-id="@Model.ProductId" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 text-info"><i class="fas fa-eye"></i> View Details</h6>
+                            </div>
+                            <p class="mb-1 small">Review full product information</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-bar"></i> Quick Stats
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="display-4 @(Model.StockQuantity <= Model.MinimumStockLevel ? "text-warning" : Model.StockQuantity == 0 ? "text-secondary" : "text-success")">
+                                @Model.StockQuantity
+                            </div>
+                            <small class="text-muted">Current Stock</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="display-4 text-primary">
+                                @Model.MinimumStockLevel
+                            </div>
+                            <small class="text-muted">Min Level</small>
+                        </div>
+                    </div>
+                    @if (Model.StockQuantity > 0)
+                    {
+                        <div class="mt-3">
+                            <div class="progress" style="height: 20px;">
+                                @{
+                                    var stockPercent = Model.MinimumStockLevel > 0 ? 
+                                        (Model.StockQuantity * 100) / (Model.MinimumStockLevel * 2) : 100;
+                                    stockPercent = Math.Min(stockPercent, 100);
+                                }
+                                <div class="progress-bar @(Model.StockQuantity <= Model.MinimumStockLevel ? "bg-warning" : "bg-success")" 
+                                     role="progressbar" style="width: @stockPercent%;" 
+                                     aria-valuenow="@stockPercent" aria-valuemin="0" aria-valuemax="100">
+                                    @Model.StockQuantity units
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function validateConfirmation() {
+            var input = document.getElementById('confirmationText');
+            var button = document.getElementById('deleteButton');
+            
+            if (input.value.toUpperCase() === 'DELETE') {
+                button.disabled = false;
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+            } else {
+                button.disabled = true;
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('confirmationText').value = '';
+            document.getElementById('confirmationText').classList.remove('is-valid', 'is-invalid');
+            document.getElementById('deleteButton').disabled = true;
+        }
+
+        // Prevent accidental form submission
+        $('form').on('submit', function(e) {
+            var confirmation = $('#confirmationText').val().toUpperCase();
+            if (confirmation !== 'DELETE') {
+                e.preventDefault();
+                alert('Please type "DELETE" in the confirmation box to proceed.');
+                return false;
+            }
+            
+            // Show loading state
+            $('#deleteButton').html('<i class="fas fa-spinner fa-spin"></i> Deleting...');
+            $('#deleteButton').prop('disabled', true);
+            
+            return true;
+        });
+
+        $(document).ready(function() {
+            // Focus on confirmation input
+            $('#confirmationText').focus();
+        });
+    </script>
+}

@@ -1,0 +1,457 @@
+@model SIOMS.ViewModels.StockUpdateModel
+@{
+    ViewData["Title"] = "Update Stock";
+    var product = ViewBag.Product as SIOMS.Models.Product;
+    var currentStock = product?.StockQuantity ?? 0;
+    var minimumStockLevel = product?.MinimumStockLevel ?? 0;
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-warehouse"></i> Update Stock
+            @if (product != null)
+            {
+                <small class="text-muted">- @product.Name</small>
+            }
+        </h1>
+        <a asp-action="Details" asp-route-id="@product?.ProductId" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Product
+        </a>
+    </div>
+
+    @if (product != null)
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Update Stock Level</h6>
+                        <span class="badge @(currentStock <= minimumStockLevel ? "bg-warning" : currentStock == 0 ? "bg-danger" : "bg-success")">
+                            Current: @currentStock units
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Product Summary -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="font-weight-bold text-primary mb-3">Product Information</h6>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td width="40%"><strong>Product:</strong></td>
+                                        <td>@product.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>SKU:</strong></td>
+                                        <td>@product.SKU</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Category:</strong></td>
+                                        <td>@(product.Category?.Name ?? "N/A")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Current Stock:</strong></td>
+                                        <td class="font-weight-bold @(currentStock <= minimumStockLevel ? "text-warning" : currentStock == 0 ? "text-danger" : "text-success")">
+                                            @currentStock units
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Minimum Level:</strong></td>
+                                        <td>@minimumStockLevel units</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="font-weight-bold text-primary mb-3">Stock Status</h6>
+                                @{
+                                    var stockPercentage = minimumStockLevel > 0 ? 
+                                        (Math.Min(currentStock, minimumStockLevel * 2) * 100) / (minimumStockLevel * 2) : 
+                                        (currentStock > 0 ? 100 : 0);
+                                    var stockColor = currentStock <= minimumStockLevel ? "bg-warning" : 
+                                                    currentStock == 0 ? "bg-danger" : "bg-success";
+                                }
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div class="progress-bar @stockColor" role="progressbar" 
+                                         style="width: @stockPercentage%;" 
+                                         aria-valuenow="@stockPercentage" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        @currentStock / @minimumStockLevel
+                                    </div>
+                                </div>
+                                
+                                @if (currentStock <= minimumStockLevel)
+                                {
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <strong>Low Stock Alert!</strong> Current stock is below minimum level.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Update Form -->
+                        <form asp-action="UpdateStock" asp-route-id="@product.ProductId" method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="MovementType" class="form-label required">Stock Movement Type</label>
+                                        <select asp-for="MovementType" class="form-select" required>
+                                            <option value="">-- Select Movement Type --</option>
+                                            <option value="Purchase">Purchase (Increase Stock)</option>
+                                            <option value="Sale">Sale (Decrease Stock)</option>
+                                            <option value="Adjustment-In">Adjustment In (Increase)</option>
+                                            <option value="Adjustment-Out">Adjustment Out (Decrease)</option>
+                                            <option value="Return">Return (Increase)</option>
+                                            <option value="Damaged">Damaged (Decrease)</option>
+                                            <option value="Expired">Expired (Decrease)</option>
+                                        </select>
+                                        <span asp-validation-for="MovementType" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Quantity" class="form-label required">Quantity</label>
+                                        <input asp-for="Quantity" class="form-control" 
+                                               min="1" max="10000" value="1" required />
+                                        <span asp-validation-for="Quantity" class="text-danger small"></span>
+                                        <small class="form-text text-muted">
+                                            Enter positive quantity to add or remove from stock
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="Notes" class="form-label">Notes/Reason</label>
+                                <textarea asp-for="Notes" class="form-control" rows="3" 
+                                          placeholder="Enter reason for stock update (optional)"></textarea>
+                                <span asp-validation-for="Notes" class="text-danger small"></span>
+                                <small class="form-text text-muted">
+                                    Example: "Received from supplier", "Sold to customer", "Inventory adjustment", etc.
+                                </small>
+                            </div>
+
+                            <!-- Quick Quantity Buttons -->
+                            <div class="mb-4">
+                                <label class="form-label">Quick Quantity</label>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary" onclick="setQuantity(1)">+1</button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="setQuantity(5)">+5</button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="setQuantity(10)">+10</button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="setQuantity(50)">+50</button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="setQuantity(100)">+100</button>
+                                </div>
+                            </div>
+
+                            <!-- Preview Changes -->
+                            <div class="card border-info mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="m-0 font-weight-bold">
+                                        <i class="fas fa-calculator"></i> Preview Changes
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 text-center">
+                                            <div class="display-4 @(currentStock <= minimumStockLevel ? "text-warning" : currentStock == 0 ? "text-danger" : "text-success")">
+                                                @currentStock
+                                            </div>
+                                            <small class="text-muted">Current Stock</small>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <div class="display-4 text-primary" id="changeDisplay">+0</div>
+                                            <small class="text-muted" id="changeLabel">Change</small>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <div class="display-4 font-weight-bold text-dark" id="newStockDisplay">@currentStock</div>
+                                            <small class="text-muted">New Stock</small>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3 mb-0" id="stockAlert">
+                                        <i class="fas fa-info-circle"></i>
+                                        Select movement type and quantity to see changes
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="form-group">
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Update Stock
+                                    </button>
+                                    <div>
+                                        <button type="reset" class="btn btn-outline-secondary">
+                                            <i class="fas fa-undo"></i> Reset
+                                        </button>
+                                        <a asp-action="Details" asp-route-id="@product.ProductId" class="btn btn-outline-primary">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="col-lg-4">
+                <!-- Movement Types Guide -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-info-circle"></i> Movement Types Guide
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 text-success"><i class="fas fa-plus-circle"></i> Purchase</h6>
+                                    <span class="badge bg-success">Increase</span>
+                                </div>
+                                <p class="mb-1 small">Stock received from supplier</p>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 text-primary"><i class="fas fa-minus-circle"></i> Sale</h6>
+                                    <span class="badge bg-primary">Decrease</span>
+                                </div>
+                                <p class="mb-1 small">Stock sold to customer</p>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 text-info"><i class="fas fa-plus-circle"></i> Adjustment-In</h6>
+                                    <span class="badge bg-info">Increase</span>
+                                </div>
+                                <p class="mb-1 small">Manual stock increase (found stock, etc.)</p>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 text-warning"><i class="fas fa-minus-circle"></i> Adjustment-Out</h6>
+                                    <span class="badge bg-warning">Decrease</span>
+                                </div>
+                                <p class="mb-1 small">Manual stock decrease (waste, etc.)</p>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 text-secondary"><i class="fas fa-undo"></i> Return</h6>
+                                    <span class="badge bg-secondary">Increase</span>
+                                </div>
+                                <p class="mb-1 small">Customer returns product</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Stock Movements -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-history"></i> Recent Movements
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            @{
+                                // Define a simple class for movements
+                                var recentMovements = new List<MovementItem>
+                                {
+                                    new MovementItem { Type = "Purchase", Quantity = 50, Date = "2 days ago" },
+                                    new MovementItem { Type = "Sale", Quantity = 10, Date = "1 day ago" },
+                                    new MovementItem { Type = "Adjustment", Quantity = 5, Date = "Today" }
+                                };
+                            }
+                            
+                            @foreach (var movement in recentMovements)
+                            {
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">
+                                            @if (movement.Type == "Purchase")
+                                            {
+                                                <span class="badge bg-success">Purchase</span>
+                                            }
+                                            else if (movement.Type == "Sale")
+                                            {
+                                                <span class="badge bg-primary">Sale</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info">Adjustment</span>
+                                            }
+                                        </h6>
+                                        <small>@movement.Date</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        @if (movement.Type == "Purchase" || movement.Type == "Adjustment")
+                                        {
+                                            <span class="text-success">+@movement.Quantity units</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">-@movement.Quantity units</span>
+                                        }
+                                    </p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Level Guidelines -->
+                <div class="card shadow mb-4 border-left-warning">
+                    <div class="card-header py-3 bg-warning">
+                        <h6 class="m-0 font-weight-bold text-white">
+                            <i class="fas fa-lightbulb"></i> Stock Management Tips
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i>
+                                <small>Update stock after each transaction</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i>
+                                <small>Record reasons for adjustments</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i>
+                                <small>Review low stock alerts daily</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i>
+                                <small>Conduct monthly physical counts</small>
+                            </li>
+                            <li>
+                                <i class="fas fa-check text-success"></i>
+                                <small>Keep movement records for audit</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Product not found!</strong> The requested product does not exist.
+        </div>
+        <a asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Products
+        </a>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var currentStock = @currentStock;
+            var minimumStockLevel = @minimumStockLevel;
+            
+            // Update preview when inputs change
+            $('#MovementType, #Quantity').on('input change', updatePreview);
+            
+            function updatePreview() {
+                var movementType = $('#MovementType').val();
+                var quantity = parseInt($('#Quantity').val()) || 0;
+                var change = 0;
+                
+                // Determine if stock increases or decreases
+                if (movementType === 'Purchase' || movementType === 'Adjustment-In' || movementType === 'Return') {
+                    change = quantity;
+                    $('#changeDisplay').removeClass('text-danger').addClass('text-success').text('+' + quantity);
+                } else if (movementType === 'Sale' || movementType === 'Adjustment-Out' || movementType === 'Damaged' || movementType === 'Expired') {
+                    change = -quantity;
+                    $('#changeDisplay').removeClass('text-success').addClass('text-danger').text('-' + quantity);
+                } else {
+                    change = 0;
+                    $('#changeDisplay').text('+0');
+                }
+                
+                // Calculate new stock
+                var newStock = currentStock + change;
+                $('#newStockDisplay').text(newStock);
+                
+                // Show warnings
+                var alertElement = $('#stockAlert');
+                if (movementType && quantity > 0) {
+                    if (newStock < 0) {
+                        alertElement.removeClass('alert-info').addClass('alert-danger')
+                            .html('<i class="fas fa-exclamation-triangle"></i> <strong>Warning!</strong> Stock cannot go below 0. New stock would be ' + newStock);
+                    } else if (newStock <= minimumStockLevel) {
+                        alertElement.removeClass('alert-info alert-danger').addClass('alert-warning')
+                            .html('<i class="fas fa-exclamation-triangle"></i> <strong>Low Stock Alert!</strong> New stock (' + newStock + ') would be below minimum level (' + minimumStockLevel + ')');
+                    } else {
+                        alertElement.removeClass('alert-danger alert-warning').addClass('alert-info')
+                            .html('<i class="fas fa-info-circle"></i> New stock will be ' + newStock + ' units');
+                    }
+                } else {
+                    alertElement.removeClass('alert-danger alert-warning').addClass('alert-info')
+                        .html('<i class="fas fa-info-circle"></i> Select movement type and quantity to see changes');
+                }
+            }
+            
+            // Quick quantity buttons
+            window.setQuantity = function(qty) {
+                $('#Quantity').val(qty).trigger('input');
+            };
+            
+            // Form validation
+            $('form').on('submit', function(e) {
+                var movementType = $('#MovementType').val();
+                var quantity = parseInt($('#Quantity').val()) || 0;
+                var newStock = currentStock;
+                
+                if (movementType === 'Purchase' || movementType === 'Adjustment-In' || movementType === 'Return') {
+                    newStock += quantity;
+                } else {
+                    newStock -= quantity;
+                }
+                
+                if (newStock < 0) {
+                    e.preventDefault();
+                    alert('Error: Stock cannot go below 0. Please adjust the quantity.');
+                    return false;
+                }
+                
+                if (quantity <= 0) {
+                    e.preventDefault();
+                    alert('Error: Quantity must be greater than 0.');
+                    return false;
+                }
+                
+                if (!movementType) {
+                    e.preventDefault();
+                    alert('Error: Please select a movement type.');
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Initialize preview
+            updatePreview();
+        });
+    </script>
+    
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@* Add this class definition at the bottom of the file *@
+@functions {
+    public class MovementItem
+    {
+        public string Type { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public string Date { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,93 @@
+@model SIOMS.Models.Category
+
+@{
+    ViewData["Title"] = "Delete Category";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-trash"></i> @ViewData["Title"]</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4 border-left-danger">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Confirm Deletion</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i> Warning!</h5>
+                        <p>Are you sure you want to delete this category? This action cannot be undone.</p>
+                    </div>
+
+                    <h5>Category Details</h5>
+                    <hr />
+                    
+                    <dl class="row">
+                        <dt class="col-sm-3">
+                            @Html.DisplayNameFor(model => model.Name)
+                        </dt>
+                        <dd class="col-sm-9">
+                            <strong>@Html.DisplayFor(model => model.Name)</strong>
+                        </dd>
+                        
+                        <dt class="col-sm-3">
+                            @Html.DisplayNameFor(model => model.Description)
+                        </dt>
+                        <dd class="col-sm-9">
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                @Html.DisplayFor(model => model.Description)
+                            }
+                            else
+                            {
+                                <span class="text-muted">No description</span>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-3">
+                            Products
+                        </dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Products.Any())
+                            {
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    This category contains <strong>@Model.Products.Count</strong> products.
+                                    You must remove or reassign these products before deleting the category.
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">No products in this category</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    @if (!Model.Products.Any())
+                    {
+                        <form asp-action="Delete">
+                            <input type="hidden" asp-for="CategoryId" />
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Permanently
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-ban me-2"></i>
+                            Cannot delete category because it contains products.
+                        </div>
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

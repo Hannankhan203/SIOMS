@@ -1,0 +1,85 @@
+@model IEnumerable<SIOMS.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-box"></i> Products</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Product
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Product List</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Category</th>
+                            <th>Supplier</th>
+                            <th>Current Stock</th>
+                            <th>Selling Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.SKU</td>
+                                <td>@item.Category?.Name</td>
+                                <td>@item.Supplier?.CompanyName</td>
+                                <td>@item.StockQuantity</td>
+                                <td>@item.SellingPrice.ToString("C")</td>
+                                <td>
+                                    @if (item.StockQuantity <= item.MinimumStockLevel)
+                                    {
+                                        <span class="badge bg-warning">Low Stock</span>
+                                    }
+                                    else if (item.StockQuantity == 0)
+                                    {
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">In Stock</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="UpdateStock" asp-route-id="@item.ProductId"
+                                            class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-warehouse"></i>
+                                        </a>
+                                        <a asp-controller="SalesOrders" asp-action="Create"
+                                            asp-route-productId="@item.ProductId" class="btn btn-success">
+                                            <i class="fas fa-cash-register"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

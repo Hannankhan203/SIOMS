@@ -1,0 +1,457 @@
+@model SIOMS.ViewModels.SalesOrderViewModel
+
+@{
+    ViewData["Title"] = "Create Sales Order";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-cash-register text-success"></i> Create Sales Order
+        </h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Sales Order Details</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" id="salesOrderForm">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        
+                        <!-- Product Information -->
+                        <div class="form-section mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-box"></i> Product Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ProductId" class="form-label required">Product</label>
+                                        <select asp-for="ProductId" asp-items="Model.Products" class="form-select" 
+                                                onchange="loadProductDetails(this.value)" required>
+                                            <option value="">-- Select Product --</option>
+                                        </select>
+                                        <span asp-validation-for="ProductId" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body py-2">
+                                            <div id="productDetails">
+                                                @if (!string.IsNullOrEmpty(Model.ProductName))
+                                                {
+                                                    <small>
+                                                        <strong>Selected:</strong> @Model.ProductName (@Model.ProductSKU)<br>
+                                                        <strong>Current Stock:</strong> @Model.CurrentStock units<br>
+                                                        <strong>Current Selling Price:</strong> @Model.CurrentSellingPrice.ToString("C")<br>
+                                                        <strong>Cost Price:</strong> @Model.BuyingPrice.ToString("C")
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">Select a product to see details</small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Details -->
+                        <div class="form-section mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-shopping-cart"></i> Order Details
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="Quantity" class="form-label required">Quantity</label>
+                                        <input asp-for="Quantity" class="form-control" min="1" max="10000" 
+                                               value="@(Model.Quantity == 0 ? 1 : Model.Quantity)" required 
+                                               oninput="checkStock()" />
+                                        <span asp-validation-for="Quantity" class="text-danger small"></span>
+                                        <small class="form-text text-muted" id="stockWarning"></small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="UnitPrice" class="form-label required">Unit Price</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input asp-for="UnitPrice" class="form-control" 
+                                                   value="@(Model.UnitPrice == 0 ? Model.CurrentSellingPrice : Model.UnitPrice)" 
+                                                   step="0.01" min="0.01" required />
+                                        </div>
+                                        <span asp-validation-for="UnitPrice" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Total Amount</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="text" class="form-control bg-light" 
+                                                   value="@Model.TotalAmount.ToString("N2")" readonly />
+                                        </div>
+                                        <small class="form-text text-muted">Quantity × Unit Price</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Profit Calculation -->
+                            <div class="row mt-3" id="profitSection" style="display: none;">
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body py-2">
+                                            <small>
+                                                <strong>Estimated Profit:</strong> 
+                                                <span id="estimatedProfit" class="text-success"></span><br>
+                                                <strong>Profit Margin:</strong> 
+                                                <span id="profitPercentage" class="text-success"></span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Information -->
+                        <div class="form-section mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user"></i> Customer Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerName" class="form-label required">Customer Name</label>
+                                        <input asp-for="CustomerName" class="form-control" 
+                                               placeholder="Enter customer name" required />
+                                        <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerPhone" class="form-label">Phone Number</label>
+                                        <input asp-for="CustomerPhone" class="form-control" 
+                                               placeholder="(123) 456-7890" />
+                                        <span asp-validation-for="CustomerPhone" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label asp-for="CustomerEmail" class="form-label">Email Address</label>
+                                        <input asp-for="CustomerEmail" type="email" class="form-control" 
+                                               placeholder="customer@example.com" />
+                                        <span asp-validation-for="CustomerEmail" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="form-section mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-calendar"></i> Dates
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="OrderDate" class="form-label required">Order Date</label>
+                                        <input asp-for="OrderDate" type="date" class="form-control" required />
+                                        <span asp-validation-for="OrderDate" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label asp-for="DeliveryDate" class="form-label">Delivery Date</label>
+                                        <input asp-for="DeliveryDate" type="date" class="form-control" />
+                                        <span asp-validation-for="DeliveryDate" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="form-section mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-sticky-note"></i> Additional Information
+                            </h5>
+                            <div class="form-group">
+                                <label asp-for="Notes" class="form-label">Notes</label>
+                                <textarea asp-for="Notes" class="form-control" rows="3" 
+                                          placeholder="Any additional notes or instructions..."></textarea>
+                                <span asp-validation-for="Notes" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-group">
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Create Sales Order
+                                </button>
+                                <div>
+                                    <button type="reset" class="btn btn-outline-secondary">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                    <a asp-action="Index" class="btn btn-outline-danger">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-4">
+            <!-- Order Summary -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-success text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-calculator"></i> Order Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="summary-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Quantity:</span>
+                            <span id="summaryQuantity">@Model.Quantity</span>
+                        </div>
+                    </div>
+                    <div class="summary-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Unit Price:</span>
+                            <span id="summaryUnitPrice">@Model.UnitPrice.ToString("C")</span>
+                        </div>
+                    </div>
+                    <div class="summary-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Total Amount:</span>
+                            <strong id="summaryTotal">@Model.TotalAmount.ToString("C")</strong>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="summary-item mb-3" id="profitDisplay" style="display: none;">
+                        <div class="d-flex justify-content-between">
+                            <span>Estimated Profit:</span>
+                            <strong class="text-success" id="summaryProfit">$0.00</strong>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i>
+                        <small>This sales order will be created with "Pending" status.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Alert -->
+            <div class="card shadow mb-4 border-left-warning">
+                <div class="card-header py-3 bg-warning">
+                    <h6 class="m-0 font-weight-bold text-white">
+                        <i class="fas fa-exclamation-triangle"></i> Stock Alert
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="stockAlert">
+                        <small class="text-muted">Select a product to see stock information</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group-vertical w-100" role="group">
+                        <button type="button" class="btn btn-outline-success text-left mb-2" onclick="setQuantity(1)">
+                            <i class="fas fa-plus-circle"></i> Set Quantity: 1
+                        </button>
+                        <button type="button" class="btn btn-outline-success text-left mb-2" onclick="setQuantity(5)">
+                            <i class="fas fa-plus-circle"></i> Set Quantity: 5
+                        </button>
+                        <button type="button" class="btn btn-outline-success text-left mb-2" onclick="setQuantity(10)">
+                            <i class="fas fa-plus-circle"></i> Set Quantity: 10
+                        </button>
+                        <a href="/Products" class="btn btn-outline-info text-left">
+                            <i class="fas fa-boxes"></i> View Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Update summary when values change
+            $('#Quantity, #UnitPrice').on('input', updateSummary);
+            
+            // Set default dates
+            var today = new Date().toISOString().split('T')[0];
+            var threeDaysLater = new Date();
+            threeDaysLater.setDate(threeDaysLater.getDate() + 3);
+            var threeDaysLaterStr = threeDaysLater.toISOString().split('T')[0];
+            
+            $('#OrderDate').val(today);
+            $('#DeliveryDate').val(threeDaysLaterStr);
+            
+            updateSummary();
+            checkStock();
+        });
+        
+        function updateSummary() {
+            var quantity = parseInt($('#Quantity').val()) || 0;
+            var unitPrice = parseFloat($('#UnitPrice').val()) || 0;
+            var total = quantity * unitPrice;
+            
+            $('#summaryQuantity').text(quantity);
+            $('#summaryUnitPrice').text('$' + unitPrice.toFixed(2));
+            $('#summaryTotal').text('$' + total.toFixed(2));
+            
+            // Update TotalAmount hidden field
+            $('#TotalAmount').val(total.toFixed(2));
+            
+            // Show profit if we have buying price
+            var productId = $('#ProductId').val();
+            if (productId) {
+                calculateProfit(productId, unitPrice, quantity);
+            }
+        }
+        
+        function loadProductDetails(productId) {
+            if (!productId) {
+                $('#productDetails').html('<small class="text-muted">Select a product to see details</small>');
+                $('#profitSection').hide();
+                return;
+            }
+            
+            // AJAX call to get product details
+            $.get('/SalesOrders/GetProductDetails/' + productId, function(data) {
+                if (data) {
+                    var html = '<small>' +
+                        '<strong>Selected:</strong> ' + data.name + ' (' + data.sku + ')<br>' +
+                        '<strong>Current Stock:</strong> ' + data.currentStock + ' units<br>' +
+                        '<strong>Current Selling Price:</strong> $' + data.sellingPrice.toFixed(2) + '<br>' +
+                        '<strong>Cost Price:</strong> $' + data.buyingPrice.toFixed(2) +
+                        '</small>';
+                    
+                    $('#productDetails').html(html);
+                    
+                    // Set unit price to current selling price
+                    if ($('#UnitPrice').val() == '0' || $('#UnitPrice').val() == '') {
+                        $('#UnitPrice').val(data.sellingPrice);
+                    }
+                    
+                    updateSummary();
+                    checkStock();
+                }
+            });
+        }
+        
+        function calculateProfit(productId, unitPrice, quantity) {
+            $.get('/SalesOrders/GetProductDetails/' + productId, function(data) {
+                if (data && data.buyingPrice) {
+                    var profitPerUnit = unitPrice - data.buyingPrice;
+                    var totalProfit = profitPerUnit * quantity;
+                    var profitPercentage = (profitPerUnit / data.buyingPrice * 100).toFixed(2);
+                    
+                    if (profitPerUnit > 0) {
+                        $('#estimatedProfit').text('$' + totalProfit.toFixed(2) + ' ($' + profitPerUnit.toFixed(2) + '/unit)');
+                        $('#profitPercentage').text(profitPercentage + '%');
+                        $('#profitSection').show();
+                        $('#summaryProfit').text('$' + totalProfit.toFixed(2));
+                        $('#profitDisplay').show();
+                    } else {
+                        $('#profitSection').hide();
+                        $('#profitDisplay').hide();
+                    }
+                }
+            });
+        }
+        
+        function checkStock() {
+            var productId = $('#ProductId').val();
+            var quantity = parseInt($('#Quantity').val()) || 0;
+            
+            if (!productId) return;
+            
+            $.get('/SalesOrders/GetProductDetails/' + productId, function(data) {
+                if (data) {
+                    var stockWarning = $('#stockWarning');
+                    var stockAlert = $('#stockAlert');
+                    
+                    if (quantity > data.currentStock) {
+                        stockWarning.html('<span class="text-danger">Insufficient stock! Available: ' + data.currentStock + ' units</span>');
+                        stockAlert.html('<div class="alert alert-danger">' +
+                            '<i class="fas fa-exclamation-triangle"></i> ' +
+                            '<strong>Stock Alert!</strong> Only ' + data.currentStock + ' units available.' +
+                            '</div>');
+                    } else if (quantity > 0) {
+                        stockWarning.html('<span class="text-success">Available stock: ' + data.currentStock + ' units</span>');
+                        stockAlert.html('<div class="alert alert-success">' +
+                            '<i class="fas fa-check-circle"></i> ' +
+                            '<strong>Stock Available:</strong> ' + data.currentStock + ' units in stock.' +
+                            '</div>');
+                    }
+                }
+            });
+        }
+        
+        function setQuantity(qty) {
+            $('#Quantity').val(qty).trigger('input');
+        }
+        
+        // Form validation
+        $('#salesOrderForm').on('submit', function(e) {
+            var quantity = parseInt($('#Quantity').val());
+            var unitPrice = parseFloat($('#UnitPrice').val());
+            var productId = $('#ProductId').val();
+            var customerName = $('#CustomerName').val();
+            
+            if (!productId) {
+                e.preventDefault();
+                alert('Please select a product.');
+                return false;
+            }
+            
+            if (!customerName.trim()) {
+                e.preventDefault();
+                alert('Please enter customer name.');
+                return false;
+            }
+            
+            if (quantity <= 0) {
+                e.preventDefault();
+                alert('Quantity must be greater than 0.');
+                return false;
+            }
+            
+            if (unitPrice <= 0) {
+                e.preventDefault();
+                alert('Unit price must be greater than 0.');
+                return false;
+            }
+            
+            return true;
+        });
+    </script>
+    
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

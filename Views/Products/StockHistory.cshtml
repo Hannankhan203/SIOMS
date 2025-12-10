@@ -1,0 +1,238 @@
+@model List<SIOMS.Models.StockMovement>
+@{
+    ViewData["Title"] = "Stock History";
+    var product = ViewBag.Product as SIOMS.Models.Product;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-history"></i> Stock History
+            @if (product != null)
+            {
+                <small class="text-muted">- @product.Name</small>
+            }
+        </h1>
+        <div>
+            @if (product != null)
+            {
+                <a asp-action="Details" asp-route-id="@product.ProductId" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Product
+                </a>
+            }
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-list"></i> All Products
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter"></i> Filter History
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Movement Type</label>
+                    <select name="movementType" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="Purchase">Purchase</option>
+                        <option value="Sale">Sale</option>
+                        <option value="Adjustment">Adjustment</option>
+                        <option value="Return">Return</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="fromDate" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="toDate" class="form-control">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Stock Movement Records</h6>
+            <span class="badge bg-primary">@Model.Count records found</span>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Movement Type</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Value</th>
+                                <th>Reference</th>
+                                <th>User</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var movement in Model)
+                            {
+                                <tr>
+                                    <td>@movement.MovementDate.ToString("dd MMM yyyy HH:mm")</td>
+                                    <td>
+                                        @switch (movement.MovementType)
+                                        {
+                                            case "Purchase":
+                                                <span class="badge bg-success">Purchase</span>
+                                                break;
+                                            case "Sale":
+                                                <span class="badge bg-primary">Sale</span>
+                                                break;
+                                            case "Adjustment-In":
+                                                <span class="badge bg-info">Adjustment In</span>
+                                                break;
+                                            case "Adjustment-Out":
+                                                <span class="badge bg-warning">Adjustment Out</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-secondary">@movement.MovementType</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="@(movement.MovementType == "Purchase" || movement.MovementType == "Adjustment-In" ? "text-success" : "text-danger") font-weight-bold">
+                                        @if (movement.MovementType == "Purchase" || movement.MovementType == "Adjustment-In")
+                                        {
+                                            <span>+@movement.Quantity</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-@movement.Quantity</span>
+                                        }
+                                    </td>
+                                    <td>@(movement.UnitPrice?.ToString("C") ?? "-")</td>
+                                    <td class="font-weight-bold">
+                                        @if (movement.UnitPrice.HasValue)
+                                        {
+                                            @((movement.Quantity * movement.UnitPrice.Value).ToString("C"))
+                                        }
+                                        else
+                                        {
+                                            @("-")
+                                        }
+                                    </td>
+                                    <td>@movement.ReferenceNumber</td>
+                                    <td>@movement.UserId?.ToString() ?? "System")</td>
+                                    <td>@movement.Notes</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="font-weight-bold">
+                                <td colspan="2" class="text-right">Summary:</td>
+                                <td>
+                                    @{
+                                        var totalIn = Model.Where(m => m.MovementType == "Purchase" || m.MovementType == "Adjustment-In")
+                                                         .Sum(m => m.Quantity);
+                                        var totalOut = Model.Where(m => m.MovementType == "Sale" || m.MovementType == "Adjustment-Out")
+                                                          .Sum(m => m.Quantity);
+                                        var netChange = totalIn - totalOut;
+                                    }
+                                    <span class="@(netChange >= 0 ? "text-success" : "text-danger")">
+                                        @(netChange >= 0 ? "+" : "")@netChange
+                                    </span>
+                                </td>
+                                <td colspan="5">
+                                    Total In: <span class="text-success">+@totalIn</span> | 
+                                    Total Out: <span class="text-danger">-@totalOut</span>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <!-- Export Options -->
+                <div class="mt-3 d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-outline-primary btn-sm" onclick="window.print()">
+                            <i class="fas fa-print"></i> Print Report
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" id="exportCsv">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                    </div>
+                    <div class="text-muted">
+                        Showing last @Model.Count movements
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No stock movement records found</h5>
+                    <p class="text-muted">This product has no recorded stock movements yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#dataTable').DataTable({
+                order: [[0, 'desc']],
+                pageLength: 25,
+                dom: '<"row"<"col-md-6"l><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search movements..."
+                }
+            });
+
+            // Export to CSV
+            $('#exportCsv').click(function() {
+                var table = $('#dataTable').DataTable();
+                var data = table.rows({ search: 'applied' }).data();
+                var csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Add headers
+                var headers = [];
+                $('#dataTable thead th').each(function() {
+                    headers.push($(this).text());
+                });
+                csvContent += headers.join(",") + "\r\n";
+                
+                // Add rows
+                data.each(function(row) {
+                    var rowData = [];
+                    $(row).each(function(index, value) {
+                        // Clean up HTML from badges
+                        var text = $(value).text().trim();
+                        rowData.push('"' + text.replace(/"/g, '""') + '"');
+                    });
+                    csvContent += rowData.join(",") + "\r\n";
+                });
+                
+                // Download
+                var encodedUri = encodeURI(csvContent);
+                var link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "stock_history_@(product?.ProductId ?? 0)_@DateTime.Now.ToString("yyyyMMdd") .csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        });
+    </script>
+}
