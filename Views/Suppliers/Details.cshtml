@@ -1,0 +1,38 @@
+@model SIOMS.Models.Supplier
+
+<h1>Supplier Details</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Company</dt>
+        <dd class="col-sm-10">@Model.CompanyName</dd>
+        
+        <dt class="col-sm-2">Contact Person</dt>
+        <dd class="col-sm-10">@Model.ContactPerson</dd>
+        
+        <dt class="col-sm-2">Phone</dt>
+        <dd class="col-sm-10">@Model.Phone</dd>
+        
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.Email</dd>
+        
+        <dt class="col-sm-2">Address</dt>
+        <dd class="col-sm-10">@Model.Address</dd>
+    </dl>
+</div>
+
+@if (ViewBag.Products != null)
+{
+    <h4>Products from this Supplier</h4>
+    <ul>
+        @foreach (var product in ViewBag.Products)
+        {
+            <li>@product.Name (@product.SKU) - Stock: @product.StockQuantity</li>
+        }
+    </ul>
+}
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.SupplierId" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
