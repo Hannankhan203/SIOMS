@@ -1,0 +1,57 @@
+@model IEnumerable<SIOMS.Models.SalesOrder>
+@{
+    ViewData["Title"] = "Sales Report";
+}
+
+<h1>Sales Report</h1>
+
+<form method="get" class="row mb-3">
+    <div class="col-md-3">
+        <label>Start Date:</label>
+        <input type="date" name="startDate" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label>End Date:</label>
+        <input type="date" name="endDate" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary mt-4">Filter</button>
+    </div>
+</form>
+
+<div class="alert alert-info">
+    <strong>Summary:</strong> 
+    @ViewBag.TotalOrders orders | 
+    Total Sales: @ViewBag.TotalSales.ToString("C") | 
+    Period: @ViewBag.StartDate?.ToString("d") to @ViewBag.EndDate?.ToString("d")
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.SalesOrderId</td>
+                <td>@order.OrderDate.ToString("d")</td>
+                <td>@order.CustomerName</td>
+                <td>@order.Product?.Name</td>
+                <td>@order.Quantity</td>
+                <td>@order.UnitPrice.ToString("C")</td>
+                <td>@order.TotalAmount.ToString("C")</td>
+                <td>@order.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>

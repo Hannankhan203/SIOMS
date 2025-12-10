@@ -1,0 +1,45 @@
+@model SIOMS.Models.Customer
+
+<h1>Customer Details</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Customer Name</dt>
+        <dd class="col-sm-10">@Model.Name</dd>
+        
+        <dt class="col-sm-2">Contact Person</dt>
+        <dd class="col-sm-10">@Model.ContactPerson</dd>
+        
+        <dt class="col-sm-2">Phone</dt>
+        <dd class="col-sm-10">@Model.Phone</dd>
+        
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.Email</dd>
+        
+        <dt class="col-sm-2">Address</dt>
+        <dd class="col-sm-10">@Model.Address</dd>
+    </dl>
+</div>
+
+@if (ViewBag.SalesOrders != null)
+{
+    <h4>Sales Orders</h4>
+    @if (ViewBag.SalesOrders.Count > 0)
+    {
+        <ul>
+            @foreach (var order in ViewBag.SalesOrders)
+            {
+                <li>Order #@order.SalesOrderId - @order.OrderDate.ToString("d") - Total: @order.TotalAmount.ToString("C")</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No sales orders found for this customer.</p>
+    }
+}
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.CustomerId" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

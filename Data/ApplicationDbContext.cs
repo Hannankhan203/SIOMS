@@ -5,7 +5,7 @@ using SIOMS.Models;
 namespace SIOMS.Data
 {
     // CHANGE: Inherit from IdentityDbContext<ApplicationUser> not DbContext
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -25,7 +25,7 @@ namespace SIOMS.Data
         public DbSet<SalesOrderItem> SalesOrderItems { get; set; }
         public DbSet<StockMovement> StockMovements { get; set; }
         public DbSet<LowStockAlert> LowStockAlerts { get; set; }
-
+        public DbSet<User> Users { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

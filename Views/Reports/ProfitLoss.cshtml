@@ -1,0 +1,89 @@
+@model IEnumerable<SIOMS.Models.SalesOrder>
+@{
+    ViewData["Title"] = "Profit & Loss Report";
+}
+
+<h1>Profit & Loss Report</h1>
+
+<form method="get" class="row mb-3">
+    <div class="col-md-3">
+        <label>Start Date:</label>
+        <input type="date" name="startDate" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label>End Date:</label>
+        <input type="date" name="endDate" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary mt-4">Filter</button>
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Total Revenue</div>
+            <div class="card-body">
+                <h4 class="card-title">@ViewBag.TotalRevenue.ToString("C")</h4>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">Total Cost</div>
+            <div class="card-body">
+                <h4 class="card-title">@ViewBag.TotalCost.ToString("C")</h4>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white @(ViewBag.ProfitLoss >= 0 ? "bg-success" : "bg-danger") mb-3">
+            <div class="card-header">Profit/Loss</div>
+            <div class="card-body">
+                <h4 class="card-title">@ViewBag.ProfitLoss.ToString("C")</h4>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white @(ViewBag.ProfitMargin >= 0 ? "bg-success" : "bg-danger") mb-3">
+            <div class="card-header">Profit Margin</div>
+            <div class="card-body">
+                <h4 class="card-title">@ViewBag.ProfitMargin.ToString("F2")%</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Completed Sales</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Revenue</th>
+            <th>Cost</th>
+            <th>Profit</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            var cost = order.Quantity * (order.Product?.BuyingPrice ?? 0);
+            var profit = order.TotalAmount - cost;
+            <tr>
+                <td>@order.SalesOrderId</td>
+                <td>@order.OrderDate.ToString("d")</td>
+                <td>@order.Product?.Name</td>
+                <td>@order.Quantity</td>
+                <td>@order.TotalAmount.ToString("C")</td>
+                <td>@cost.ToString("C")</td>
+                <td class="@(profit >= 0 ? "text-success" : "text-danger")">@profit.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>

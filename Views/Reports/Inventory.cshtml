@@ -1,0 +1,44 @@
+@model IEnumerable<SIOMS.Models.Product>
+@{
+    ViewData["Title"] = "Inventory Report";
+}
+
+<h1>Inventory Report</h1>
+
+<div class="alert alert-warning">
+    <strong>Low Stock Alert:</strong> @ViewBag.LowStockCount products below reorder level
+</div>
+
+<div class="alert alert-info">
+    <strong>Total Inventory Value:</strong> @ViewBag.TotalValue.ToString("C")
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>Supplier</th>
+            <th>Stock Qty</th>
+            <th>Reorder Level</th>
+            <th>Buying Price</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr class="@(product.StockQuantity <= product.ReorderLevel ? "table-danger" : "")">
+                <td>@product.Name</td>
+                <td>@product.SKU</td>
+                <td>@product.Category?.Name</td>
+                <td>@product.Supplier?.CompanyName</td>
+                <td>@product.StockQuantity</td>
+                <td>@product.ReorderLevel</td>
+                <td>@product.BuyingPrice.ToString("C")</td>
+                <td>@((product.StockQuantity * product.BuyingPrice).ToString("C"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
