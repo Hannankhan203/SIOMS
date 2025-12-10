@@ -1,0 +1,45 @@
+@model IEnumerable<SIOMS.Models.SalesOrder>
+
+<h1>Sales Orders</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Customer</th>
+            <th>Order Date</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.SalesOrderId</td>
+                <td>@order.Product?.Name</td>
+                <td>@order.Quantity</td>
+                <td>@order.CustomerName</td>
+                <td>@order.OrderDate.ToString("d")</td>
+                <td>@order.TotalAmount.ToString("C")</td>
+                <td>@order.Status</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@order.SalesOrderId" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Edit" asp-route-id="@order.SalesOrderId" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@order.SalesOrderId" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p class="text-muted">
+    © 2024 - SIOMS - Smart Inventory & Order Management System
+</p>

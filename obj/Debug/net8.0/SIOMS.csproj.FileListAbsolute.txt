@@ -121,6 +121,7 @@ D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\SIOMS.csproj.CoreCo
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\SIOMS.MvcApplicationPartsAssemblyInfo.cache
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\SIOMS.RazorAssemblyInfo.cache
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\SIOMS.RazorAssemblyInfo.cs
+D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\SIOMS.sourcelink.json
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\rjimswa.dswa.cache.json
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
@@ -138,4 +139,3 @@ D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\refint\SIOMS.dll
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\SIOMS.pdb
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\SIOMS.genruntimeconfig.cache
 D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\ref\SIOMS.dll
-D:\Advanced Programming Project\SIOMS\SIOMS\obj\Debug\net8.0\SIOMS.sourcelink.json

@@ -1,364 +1,67 @@
-@model SIOMS.ViewModels.PurchaseOrderViewModel
+@model SIOMS.Models.PurchaseOrder
 
-@{
-    ViewData["Title"] = "Create Purchase Order";
-}
+<h2>Create Purchase Order</h2>
 
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-cart-plus text-primary"></i> Create Purchase Order
-        </h1>
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to List
-        </a>
-    </div>
-
+<form asp-action="Create">
     <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Purchase Order Details</h6>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Create" id="purchaseOrderForm">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-                        
-                        <!-- Product Information -->
-                        <div class="form-section mb-4">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-box"></i> Product Information
-                            </h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="ProductId" class="form-label required">Product</label>
-                                        <select asp-for="ProductId" asp-items="Model.Products" class="form-select" 
-                                                onchange="loadProductDetails(this.value)" required>
-                                            <option value="">-- Select Product --</option>
-                                        </select>
-                                        <span asp-validation-for="ProductId" class="text-danger small"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card bg-light">
-                                        <div class="card-body py-2">
-                                            <div id="productDetails">
-                                                @if (!string.IsNullOrEmpty(Model.ProductName))
-                                                {
-                                                    <small>
-                                                        <strong>Selected:</strong> @Model.ProductName (@Model.ProductSKU)<br>
-                                                        <strong>Current Stock:</strong> @Model.CurrentStock units<br>
-                                                        <strong>Current Buying Price:</strong> @Model.CurrentBuyingPrice.ToString("C")
-                                                    </small>
-                                                }
-                                                else
-                                                {
-                                                    <small class="text-muted">Select a product to see details</small>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Order Details -->
-                        <div class="form-section mb-4">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-clipboard-list"></i> Order Details
-                            </h5>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label asp-for="Quantity" class="form-label required">Quantity</label>
-                                        <input asp-for="Quantity" class="form-control" min="1" max="10000" 
-                                               value="@(Model.Quantity == 0 ? 1 : Model.Quantity)" required />
-                                        <span asp-validation-for="Quantity" class="text-danger small"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label asp-for="UnitPrice" class="form-label required">Unit Price</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input asp-for="UnitPrice" class="form-control" 
-                                                   value="@(Model.UnitPrice == 0 ? Model.CurrentBuyingPrice : Model.UnitPrice)" 
-                                                   step="0.01" min="0.01" required />
-                                        </div>
-                                        <span asp-validation-for="UnitPrice" class="text-danger small"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="form-label">Total Amount</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="text" class="form-control bg-light" 
-                                                   value="@Model.TotalAmount.ToString("N2")" readonly />
-                                        </div>
-                                        <small class="form-text text-muted">Quantity × Unit Price</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Supplier Information -->
-                        <div class="form-section mb-4">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-truck"></i> Supplier Information
-                            </h5>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="SupplierId" class="form-label required">Supplier</label>
-                                        <select asp-for="SupplierId" asp-items="Model.Suppliers" class="form-select" required>
-                                            <option value="">-- Select Supplier --</option>
-                                        </select>
-                                        <span asp-validation-for="SupplierId" class="text-danger small"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label asp-for="OrderDate" class="form-label required">Order Date</label>
-                                        <input asp-for="OrderDate" type="date" class="form-control" required />
-                                        <span asp-validation-for="OrderDate" class="text-danger small"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label asp-for="ExpectedDeliveryDate" class="form-label">Expected Delivery</label>
-                                        <input asp-for="ExpectedDeliveryDate" type="date" class="form-control" />
-                                        <span asp-validation-for="ExpectedDeliveryDate" class="text-danger small"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Notes -->
-                        <div class="form-section mb-4">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-sticky-note"></i> Additional Information
-                            </h5>
-                            <div class="form-group">
-                                <label asp-for="Notes" class="form-label">Notes</label>
-                                <textarea asp-for="Notes" class="form-control" rows="3" 
-                                          placeholder="Any additional notes or instructions..."></textarea>
-                                <span asp-validation-for="Notes" class="text-danger small"></span>
-                            </div>
-                        </div>
-
-                        <!-- Form Actions -->
-                        <div class="form-group">
-                            <div class="d-flex justify-content-between">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Create Purchase Order
-                                </button>
-                                <div>
-                                    <button type="reset" class="btn btn-outline-secondary">
-                                        <i class="fas fa-undo"></i> Reset
-                                    </button>
-                                    <a asp-action="Index" class="btn btn-outline-danger">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="OrderNumber" class="control-label"></label>
+                <input asp-for="OrderNumber" class="form-control" />
+                <span asp-validation-for="OrderNumber" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="SupplierId" class="control-label">Supplier</label>
+                <select asp-for="SupplierId" class="form-control" asp-items="ViewBag.Suppliers">
+                    <option value="">-- Select Supplier --</option>
+                </select>
+                <span asp-validation-for="SupplierId" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="ProductId" class="control-label">Product</label>
+                <select asp-for="ProductId" class="form-control" asp-items="ViewBag.Products">
+                    <option value="">-- Select Product --</option>
+                </select>
+                <span asp-validation-for="ProductId" class="text-danger"></span>
             </div>
         </div>
-
-        <!-- Right Sidebar -->
-        <div class="col-lg-4">
-            <!-- Order Summary -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-primary text-white">
-                    <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-calculator"></i> Order Summary
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="summary-item mb-3">
-                        <div class="d-flex justify-content-between">
-                            <span>Quantity:</span>
-                            <span id="summaryQuantity">@Model.Quantity</span>
-                        </div>
-                    </div>
-                    <div class="summary-item mb-3">
-                        <div class="d-flex justify-content-between">
-                            <span>Unit Price:</span>
-                            <span id="summaryUnitPrice">@Model.UnitPrice.ToString("C")</span>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="summary-item mb-3">
-                        <div class="d-flex justify-content-between">
-                            <strong>Total Amount:</strong>
-                            <strong id="summaryTotal">@Model.TotalAmount.ToString("C")</strong>
-                        </div>
-                    </div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle"></i>
-                        <small>This purchase order will be created with "Pending" status.</small>
-                    </div>
-                </div>
+        
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input asp-for="Quantity" class="form-control" type="number" min="1" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
             </div>
-
-            <!-- Quick Actions -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-bolt"></i> Quick Actions
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="btn-group-vertical w-100" role="group">
-                        <button type="button" class="btn btn-outline-primary text-left mb-2" onclick="setQuantity(10)">
-                            <i class="fas fa-plus-circle"></i> Set Quantity: 10
-                        </button>
-                        <button type="button" class="btn btn-outline-primary text-left mb-2" onclick="setQuantity(50)">
-                            <i class="fas fa-plus-circle"></i> Set Quantity: 50
-                        </button>
-                        <button type="button" class="btn btn-outline-primary text-left mb-2" onclick="setQuantity(100)">
-                            <i class="fas fa-plus-circle"></i> Set Quantity: 100
-                        </button>
-                        <a href="/Products" class="btn btn-outline-info text-left">
-                            <i class="fas fa-boxes"></i> View Products
-                        </a>
-                    </div>
-                </div>
+            
+            <div class="form-group">
+                <label asp-for="UnitPrice" class="control-label"></label>
+                <input asp-for="UnitPrice" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="UnitPrice" class="text-danger"></span>
             </div>
-
-            <!-- Help Guide -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-question-circle"></i> Help Guide
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2">
-                            <i class="fas fa-check text-success"></i>
-                            <small>Select product and supplier</small>
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-check text-success"></i>
-                            <small>Enter quantity and unit price</small>
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-check text-success"></i>
-                            <small>Set delivery dates</small>
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-check text-success"></i>
-                            <small>Add notes if needed</small>
-                        </li>
-                        <li>
-                            <i class="fas fa-check text-success"></i>
-                            <small>Submit to create order</small>
-                        </li>
-                    </ul>
-                </div>
+            
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <select asp-for="Status" class="form-control">
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+                <span asp-validation-for="Status" class="text-danger"></span>
             </div>
         </div>
     </div>
-</div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function() {
-            // Update summary when values change
-            $('#Quantity, #UnitPrice').on('input', updateSummary);
-            
-            // Set default dates
-            var today = new Date().toISOString().split('T')[0];
-            var nextWeek = new Date();
-            nextWeek.setDate(nextWeek.getDate() + 7);
-            var nextWeekStr = nextWeek.toISOString().split('T')[0];
-            
-            $('#OrderDate').val(today);
-            $('#ExpectedDeliveryDate').val(nextWeekStr);
-            
-            updateSummary();
-        });
-        
-        function updateSummary() {
-            var quantity = parseInt($('#Quantity').val()) || 0;
-            var unitPrice = parseFloat($('#UnitPrice').val()) || 0;
-            var total = quantity * unitPrice;
-            
-            $('#summaryQuantity').text(quantity);
-            $('#summaryUnitPrice').text('$' + unitPrice.toFixed(2));
-            $('#summaryTotal').text('$' + total.toFixed(2));
-        }
-        
-        function loadProductDetails(productId) {
-            if (!productId) {
-                $('#productDetails').html('<small class="text-muted">Select a product to see details</small>');
-                return;
-            }
-            
-            // AJAX call to get product details
-            $.get('/PurchaseOrders/GetProductDetails/' + productId, function(data) {
-                if (data) {
-                    var html = '<small>' +
-                        '<strong>Selected:</strong> ' + data.name + ' (' + data.sku + ')<br>' +
-                        '<strong>Current Stock:</strong> ' + data.currentStock + ' units<br>' +
-                        '<strong>Current Buying Price:</strong> $' + data.buyingPrice.toFixed(2) +
-                        '</small>';
-                    
-                    $('#productDetails').html(html);
-                    
-                    // Set unit price to current buying price
-                    if ($('#UnitPrice').val() == '0' || $('#UnitPrice').val() == '') {
-                        $('#UnitPrice').val(data.buyingPrice);
-                        updateSummary();
-                    }
-                }
-            });
-        }
-        
-        function setQuantity(qty) {
-            $('#Quantity').val(qty).trigger('input');
-        }
-        
-        // Form validation
-        $('#purchaseOrderForm').on('submit', function(e) {
-            var quantity = parseInt($('#Quantity').val());
-            var unitPrice = parseFloat($('#UnitPrice').val());
-            var productId = $('#ProductId').val();
-            var supplierId = $('#SupplierId').val();
-            
-            if (!productId) {
-                e.preventDefault();
-                alert('Please select a product.');
-                return false;
-            }
-            
-            if (!supplierId) {
-                e.preventDefault();
-                alert('Please select a supplier.');
-                return false;
-            }
-            
-            if (quantity <= 0) {
-                e.preventDefault();
-                alert('Quantity must be greater than 0.');
-                return false;
-            }
-            
-            if (unitPrice <= 0) {
-                e.preventDefault();
-                alert('Unit price must be greater than 0.');
-                return false;
-            }
-            
-            return true;
-        });
-    </script>
     
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    <div class="form-group">
+        <label asp-for="Notes" class="control-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group mt-3">
+        <input type="submit" value="Create" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</form>

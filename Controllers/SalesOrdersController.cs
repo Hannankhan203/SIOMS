@@ -28,7 +28,7 @@ namespace SIOMS.Controllers
                 .Include(so => so.Product)
                 .OrderByDescending(so => so.OrderDate)
                 .ToListAsync();
-            
+
             return View(salesOrders);
         }
 
@@ -43,7 +43,7 @@ namespace SIOMS.Controllers
             var salesOrder = await _context.SalesOrders
                 .Include(so => so.Product)
                 .FirstOrDefaultAsync(m => m.SalesOrderId == id);
-                
+
             if (salesOrder == null)
             {
                 return NotFound();
@@ -70,13 +70,14 @@ namespace SIOMS.Controllers
                 })
                 .ToListAsync();
 
-            // If productId is provided, pre-select it
+            // Inside the Create GET method, after loading product details:
             if (productId.HasValue)
             {
                 viewModel.ProductId = productId.Value;
                 var product = await _context.Products.FindAsync(productId.Value);
                 if (product != null)
                 {
+                    // SET UNIT PRICE HERE
                     viewModel.UnitPrice = product.SellingPrice;
                     viewModel.ProductName = product.Name;
                     viewModel.ProductSKU = product.SKU;
@@ -84,6 +85,11 @@ namespace SIOMS.Controllers
                     viewModel.CurrentStock = product.StockQuantity;
                     viewModel.BuyingPrice = product.BuyingPrice;
                 }
+            }
+            else
+            {
+                // Set default unit price to 1 or current selling price
+                viewModel.UnitPrice = 1.00m;
             }
 
             return View(viewModel);
@@ -97,8 +103,8 @@ namespace SIOMS.Controllers
             {
                 return NotFound();
             }
-            
-            return Json(new 
+
+            return Json(new
             {
                 name = product.Name,
                 sku = product.SKU,
@@ -119,7 +125,7 @@ namespace SIOMS.Controllers
                 {
                     // Calculate total amount
                     model.TotalAmount = model.Quantity * model.UnitPrice;
-                    
+
                     // Check if enough stock is available
                     var product = await _context.Products.FindAsync(model.ProductId);
                     if (product == null)
@@ -127,7 +133,7 @@ namespace SIOMS.Controllers
                         ModelState.AddModelError("ProductId", "Product not found");
                         return View(model);
                     }
-                    
+
                     if (product.StockQuantity < model.Quantity)
                     {
                         ModelState.AddModelError("Quantity", $"Insufficient stock. Available: {product.StockQuantity} units");
@@ -160,9 +166,9 @@ namespace SIOMS.Controllers
 
                     _context.Add(salesOrder);
                     await _context.SaveChangesAsync();
-                    
+
                     _logger.LogInformation($"Sales order created: ID {salesOrder.SalesOrderId}, Product: {model.ProductId}, Quantity: {model.Quantity}");
-                    
+
                     TempData["SuccessMessage"] = "Sales order created successfully!";
                     return RedirectToAction(nameof(Index));
                 }
@@ -242,7 +248,7 @@ namespace SIOMS.Controllers
                 {
                     // Calculate total amount
                     model.TotalAmount = model.Quantity * model.UnitPrice;
-                    
+
                     var salesOrder = await _context.SalesOrders.FindAsync(id);
                     if (salesOrder == null)
                     {
@@ -263,7 +269,7 @@ namespace SIOMS.Controllers
 
                     _context.Update(salesOrder);
                     await _context.SaveChangesAsync();
-                    
+
                     TempData["SuccessMessage"] = "Sales order updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
@@ -303,7 +309,7 @@ namespace SIOMS.Controllers
             var salesOrder = await _context.SalesOrders
                 .Include(so => so.Product)
                 .FirstOrDefaultAsync(m => m.SalesOrderId == id);
-                
+
             if (salesOrder == null)
             {
                 return NotFound();
@@ -324,7 +330,7 @@ namespace SIOMS.Controllers
                 {
                     _context.SalesOrders.Remove(salesOrder);
                     await _context.SaveChangesAsync();
-                    
+
                     _logger.LogInformation($"Sales order deleted: ID {id}");
                     TempData["SuccessMessage"] = "Sales order deleted successfully!";
                 }
@@ -334,7 +340,7 @@ namespace SIOMS.Controllers
                 _logger.LogError(ex, "Error deleting sales order");
                 TempData["ErrorMessage"] = $"Error deleting sales order: {ex.Message}";
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -348,7 +354,7 @@ namespace SIOMS.Controllers
                 var salesOrder = await _context.SalesOrders
                     .Include(so => so.Product)
                     .FirstOrDefaultAsync(so => so.SalesOrderId == id);
-                    
+
                 if (salesOrder == null)
                 {
                     return NotFound();
@@ -366,15 +372,15 @@ namespace SIOMS.Controllers
                         TempData["ErrorMessage"] = $"Cannot complete order. Insufficient stock. Available: {salesOrder.Product.StockQuantity} units";
                         return RedirectToAction(nameof(Details), new { id });
                     }
-                    
+
                     salesOrder.Product.StockQuantity -= salesOrder.Quantity;
                     salesOrder.Product.UpdatedDate = DateTime.Now;
-                    
+
                     _logger.LogInformation($"Stock updated via SO#{id}: -{salesOrder.Quantity} units for product {salesOrder.Product.Name}");
                 }
 
                 await _context.SaveChangesAsync();
-                
+
                 TempData["SuccessMessage"] = $"Sales order completed! {salesOrder.Quantity} units sold.";
                 return RedirectToAction(nameof(Details), new { id });
             }
