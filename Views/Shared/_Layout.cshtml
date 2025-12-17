@@ -1,129 +1,334 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SIOMS</title>
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SIOMS.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/product-details.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/edit-product.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico">
+    
+    <!-- Add this style for footer fix -->
+    <style>
+        .main-content-wrapper {
+            min-height: calc(100vh - 180px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page-content-container {
+            flex: 1;
+        }
+        
+        .footer-wrapper {
+            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+            color: #9ca3af;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-wrapper .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .footer-wrapper .btn-outline-light:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+    </style>
 </head>
 
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-boxes"></i> SIOMS
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-tachometer-alt"></i> Dashboard
+<body class="d-flex flex-column h-100">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <!-- Brand with Logo -->
+            <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                <div class="logo-icon me-2">
+                    <i class="fas fa-boxes fa-lg"></i>
+                </div>
+                <span class="fw-bold">SIOMS</span>
+                <small class="badge bg-light text-primary ms-2 d-none d-md-inline">v2.0</small>
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Main Navigation -->
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")" 
+                           asp-controller="Home" asp-action="Index">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Inventory Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-warehouse me-1"></i> Inventory
+                        </a>
+                        <ul class="dropdown-menu shadow-lg">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" asp-controller="Products" asp-action="Index">
+                                    <i class="fas fa-box text-primary me-2"></i>
+                                    <div>
+                                        <div>Products</div>
+                                        <small class="text-muted">Manage inventory items</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" asp-controller="Categories" asp-action="Index">
+                                    <i class="fas fa-tags text-success me-2"></i>
+                                    <div>
+                                        <div>Categories</div>
+                                        <small class="text-muted">Product classification</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" asp-controller="StockMovements" asp-action="Index">
+                                    <i class="fas fa-exchange-alt text-info me-2"></i>
+                                    <div>
+                                        <div>Stock Movements</div>
+                                        <small class="text-muted">Track inventory changes</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" asp-controller="LowStockAlerts" asp-action="Index">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    <div>
+                                        <div>Low Stock Alerts</div>
+                                        <small class="text-muted">Reorder notifications</small>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Orders Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-shopping-cart me-1"></i> Orders
+                        </a>
+                        <ul class="dropdown-menu shadow-lg">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" asp-controller="PurchaseOrders" asp-action="Index">
+                                    <i class="fas fa-truck-loading text-primary me-2"></i>
+                                    <div>
+                                        <div>Purchase Orders</div>
+                                        <small class="text-muted">Supplier orders</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" asp-controller="SalesOrders" asp-action="Index">
+                                    <i class="fas fa-cash-register text-success me-2"></i>
+                                    <div>
+                                        <div>Sales Orders</div>
+                                        <small class="text-muted">Customer sales</small>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Partners Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users me-1"></i> Partners
+                        </a>
+                        <ul class="dropdown-menu shadow-lg">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" asp-controller="Suppliers" asp-action="Index">
+                                    <i class="fas fa-truck text-primary me-2"></i>
+                                    <div>
+                                        <div>Suppliers</div>
+                                        <small class="text-muted">Product vendors</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" asp-controller="Customers" asp-action="Index">
+                                    <i class="fas fa-user-tie text-info me-2"></i>
+                                    <div>
+                                        <div>Customers</div>
+                                        <small class="text-muted">Buyer management</small>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Reports -->
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reports" ? "active" : "")" 
+                           asp-controller="Reports" asp-action="Index">
+                            <i class="fas fa-chart-bar me-1"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- User Section -->
+                <div class="navbar-nav ms-auto">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                                <span>@User.Identity.Name</span>
                             </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="inventoryDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-warehouse"></i> Inventory
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="inventoryDropdown">
-                                <li><a class="dropdown-item" asp-controller="Products" asp-action="Index"><i
-                                            class="fas fa-box"></i> Products</a></li>
-                                <li><a class="dropdown-item" asp-controller="Categories" asp-action="Index"><i
-                                            class="fas fa-tags"></i> Categories</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg">
                                 <li>
-                                    <hr class="dropdown-divider">
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-user-cog me-2"></i> Profile
+                                    </a>
                                 </li>
-                                <li><a class="dropdown-item" asp-controller="StockMovements" asp-action="Index"><i
-                                            class="fas fa-exchange-alt"></i> Stock Movements</a></li>
-                                <!-- FIXED: Changed controller from "LowStockAlerts" to "LowStockAlerts" -->
-                                <li><a class="dropdown-item" asp-controller="LowStockAlerts" asp-action="Index"><i
-                                            class="fas fa-exclamation-triangle"></i> Low Stock Alerts</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-cog me-2"></i> Settings
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
                             </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-shopping-cart"></i> Orders
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-outline-light btn-sm" asp-controller="Account" asp-action="Register">
+                                <i class="fas fa-user-plus me-1"></i> Register
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="ordersDropdown">
-                                <li><a class="dropdown-item" asp-controller="PurchaseOrders" asp-action="Index"><i
-                                            class="fas fa-truck-loading"></i> Purchase Orders</a></li>
-                                <li><a class="dropdown-item" asp-controller="SalesOrders" asp-action="Index"><i
-                                            class="fas fa-cash-register"></i> Sales Orders</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="partnersDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-users"></i> Partners
+                            <a class="btn btn-light btn-sm" asp-controller="Account" asp-action="Login">
+                                <i class="fas fa-sign-in-alt me-1"></i> Login
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="partnersDropdown">
-                                <li><a class="dropdown-item" asp-controller="Suppliers" asp-action="Index"><i
-                                            class="fas fa-truck"></i> Suppliers</a></li>
-                                <li><a class="dropdown-item" asp-controller="Customers" asp-action="Index"><i
-                                            class="fas fa-user-tie"></i> Customers</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Reports" asp-action="Index">
-                                <i class="fas fa-chart-bar"></i> Reports
-                            </a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <span class="navbar-text text-light">Hello, @User.Identity.Name!</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
-                                    <button type="submit" class="nav-link btn btn-link text-light">Logout</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-controller="Account" asp-action="Register">Register</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                        }
-                    </ul>
+                        </div>
+                    }
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content-wrapper">
+        <main class="page-content-container">
+            <div class="container-fluid py-4 page-transition" style="margin-top: 4.5rem;">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb bg-white rounded shadow-sm p-3">
+                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                        @if (!string.IsNullOrEmpty(ViewBag.Area))
+                        {
+                            <li class="breadcrumb-item"><a href="#">@ViewBag.Area</a></li>
+                        }
+                        @if (!string.IsNullOrEmpty(ViewBag.Controller) && ViewBag.Controller != "Home")
+                        {
+                            <li class="breadcrumb-item"><a asp-controller="@ViewBag.Controller" asp-action="Index">@ViewBag.Controller</a></li>
+                        }
+                        <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+                    </ol>
+                </nav>
+
+                <!-- Page Content -->
+                @RenderBody()
+            </div>
         </main>
+
+        <!-- Footer -->
+        <footer class="footer-wrapper mt-auto py-3">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="text-center text-md-start">
+                            <p class="mb-1">
+                                &copy; 2024 <strong>SIOMS</strong> - Smart Inventory & Order Management System
+                            </p>
+                            <small class="text-light">Version 2.0 | Powered by ASP.NET Core</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-center text-md-end mt-2 mt-md-0">
+                            <div class="btn-group" role="group">
+                                <a href="#" class="btn btn-sm btn-outline-light">
+                                    <i class="fas fa-question-circle"></i> Help
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-light">
+                                    <i class="fas fa-book"></i> Docs
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-light">
+                                    <i class="fas fa-code"></i> API
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - SIOMS - Smart Inventory & Order Management System
-        </div>
-    </footer>
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script>
+        // Fix JavaScript syntax error (removed extra closing parenthesis)
+        $(document).ready(function() {
+            // Add smooth scrolling
+            $('a[href*="#"]').on('click', function(e) {
+                if (this.hash !== "") {
+                    e.preventDefault();
+                    const hash = this.hash;
+                    $('html, body').animate({
+                        scrollTop: $(hash).offset().top - 80
+                    }, 800);
+                }
+            });
+            
+            // Tooltip initialization
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert:not(.alert-permanent)').fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-
 </html>

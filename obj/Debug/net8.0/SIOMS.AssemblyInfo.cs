@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SIOMS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e0079850b2ead07bffe5e8ca8c335a268607ab2b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+682cd25f29240708bfdd9ab736fc51583f3ee07b")]
 [assembly: System.Reflection.AssemblyProductAttribute("SIOMS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SIOMS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

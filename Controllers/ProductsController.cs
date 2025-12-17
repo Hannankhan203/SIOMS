@@ -24,12 +24,16 @@ namespace SIOMS.Controllers
             _logger = logger;
         }
 
-        // GET: Products
-        public async Task<IActionResult> Index()
-        {
-            var products = await _inventoryService.GetAllProductsAsync();
-            return View(products);
-        }
+       // GET: Products
+public async Task<IActionResult> Index()
+{
+    var products = await _inventoryService.GetAllProductsAsync();
+    
+    // Add this line to populate ViewBag.Categories
+    ViewBag.Categories = await _context.Categories.ToListAsync();
+    
+    return View(products);
+}
 
         // GET: Products/Details/5
         public async Task<IActionResult> Details(int? id)

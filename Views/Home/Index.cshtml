@@ -1,182 +1,281 @@
-﻿@model SIOMS.ViewModels.DashboardViewModel
+@model SIOMS.ViewModels.DashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
+    ViewBag.Controller = "Home";
 }
 
 <div class="container-fluid">
-    <h1 class="display-4 mb-4"><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
-    
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div>
+            <h1 class="h2 mb-1"><i class="fas fa-tachometer-alt text-primary me-2"></i> Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's what's happening with your inventory today.</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <div class="btn-group" role="group">
+                <a asp-controller="SalesOrders" asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-cash-register me-2"></i> New Sale
+                </a>
+                <a asp-controller="Products" asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> Add Product
+                </a>
+                <button type="button" class="btn btn-outline-secondary" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-primary shadow h-100">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Products
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalProducts</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Total Products</h6>
+                            <h2 class="mb-0">@Model.TotalProducts</h2>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        <div class="icon-circle bg-primary bg-opacity-10">
+                            <i class="fas fa-box text-primary fa-lg"></i>
                         </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                            View Products <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-success shadow h-100">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Monthly Sales
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.MonthlySales.ToString("C")</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Monthly Sales</h6>
+                            <h2 class="mb-0">@Model.MonthlySales.ToString("C")</h2>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        <div class="icon-circle bg-success bg-opacity-10">
+                            <i class="fas fa-dollar-sign text-success fa-lg"></i>
                         </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-controller="Reports" asp-action="Sales" class="btn btn-sm btn-outline-success">
+                            View Report <i class="fas fa-chart-line ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-warning shadow h-100">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Low Stock Items
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.LowStockItems</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Low Stock Items</h6>
+                            <h2 class="mb-0">@Model.LowStockItems</h2>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        <div class="icon-circle bg-warning bg-opacity-10">
+                            <i class="fas fa-exclamation-triangle text-warning fa-lg"></i>
                         </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-controller="LowStockAlerts" asp-action="Index" class="btn btn-sm btn-outline-warning">
+                            View Alerts <i class="fas fa-bell ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start-info shadow h-100">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Total Customers
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalCustomers</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Total Customers</h6>
+                            <h2 class="mb-0">@Model.TotalCustomers</h2>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        <div class="icon-circle bg-info bg-opacity-10">
+                            <i class="fas fa-users text-info fa-lg"></i>
                         </div>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-controller="Customers" asp-action="Index" class="btn btn-sm btn-outline-info">
+                            View Customers <i class="fas fa-user-tie ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Charts and Tables -->
-    <div class="row">
-        <!-- Monthly Sales Chart -->
-        <div class="col-xl-8 col-lg-7 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Monthly Sales Trend</h6>
+
+    <!-- Charts and Alerts -->
+    <div class="row g-4">
+        <!-- Sales Chart -->
+        <div class="col-xl-8">
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line text-primary me-2"></i> Monthly Sales Trend
+                    </h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary active" data-period="month">Month</button>
+                        <button type="button" class="btn btn-outline-primary" data-period="quarter">Quarter</button>
+                        <button type="button" class="btn btn-outline-primary" data-period="year">Year</button>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="chart-area">
+                    <div class="chart-container" style="position: relative; height: 300px;">
                         <canvas id="salesChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Low Stock Alerts -->
-        <div class="col-xl-4 col-lg-5 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-warning">Low Stock Alerts</h6>
+        <div class="col-xl-4">
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i> Low Stock Alerts
+                    </h5>
+                    <span class="badge bg-warning">@Model.ActiveAlerts.Count</span>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     @if (Model.ActiveAlerts.Any())
                     {
-                        <div class="list-group">
+                        <div class="list-group list-group-flush">
                             @foreach (var alert in Model.ActiveAlerts.Take(5))
                             {
                                 <a href="@Url.Action("Details", "Products", new { id = alert.ProductId })" 
-                                   class="list-group-item list-group-item-action">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h6 class="mb-1">@alert.ProductName</h6>
-                                        <small>@alert.AlertDate.ToString("MMM dd")</small>
+                                   class="list-group-item list-group-item-action border-0 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="alert-icon bg-warning bg-opacity-10 rounded-circle p-2">
+                                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1">@alert.ProductName</h6>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <span class="badge bg-light text-dark">
+                                                        <i class="fas fa-cubes me-1"></i> @alert.CurrentStock
+                                                    </span>
+                                                    <span class="mx-2">→</span>
+                                                    <span class="badge bg-light text-dark">
+                                                        <i class="fas fa-bullseye me-1"></i> @alert.MinimumStockLevel
+                                                    </span>
+                                                </small>
+                                                <small class="text-muted">@alert.AlertDate.ToString("MMM dd")</small>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <p class="mb-1">Current: @alert.CurrentStock | Minimum: @alert.MinimumStockLevel</p>
                                 </a>
                             }
                         </div>
                         @if (Model.ActiveAlerts.Count > 5)
                         {
-                            <div class="text-center mt-2">
+                            <div class="card-footer text-center">
                                 <a href="@Url.Action("Index", "LowStockAlerts")" class="btn btn-sm btn-warning">
-                                    View All (@Model.ActiveAlerts.Count)
+                                    View All (@Model.ActiveAlerts.Count) <i class="fas fa-arrow-right ms-1"></i>
                                 </a>
                             </div>
                         }
                     }
                     else
                     {
-                        <p class="text-center text-muted">No low stock alerts</p>
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle fa-3x text-success opacity-25"></i>
+                            </div>
+                            <h5 class="text-muted">All Good!</h5>
+                            <p class="text-muted">No low stock alerts at the moment.</p>
+                        </div>
                     }
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Top Selling Products -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Top Selling Products</h6>
+
+    <!-- Recent Activity & Top Products -->
+    <div class="row g-4 mt-4">
+        <!-- Top Selling Products -->
+        <div class="col-xl-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-fire text-danger me-2"></i> Top Selling Products
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
+                        <table class="table table-hover">
                             <thead>
                                 <tr>
                                     <th>Product</th>
                                     <th>Category</th>
-                                    <th>Current Stock</th>
-                                    <th>Selling Price</th>
+                                    <th>Stock</th>
+                                    <th>Price</th>
                                     <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var product in Model.TopSellingProducts)
                                 {
+                                    var stockStatus = product.StockQuantity <= product.MinimumStockLevel ? "Low" : 
+                                                     product.StockQuantity == 0 ? "Out" : "Good";
+                                    var statusColor = product.StockQuantity <= product.MinimumStockLevel ? "warning" : 
+                                                     product.StockQuantity == 0 ? "danger" : "success";
+                                    
                                     <tr>
-                                        <td>@product.Name</td>
-                                        <td>@product.Category?.Name</td>
-                                        <td>@product.StockQuantity</td>
-                                        <td>@product.SellingPrice.ToString("C")</td>
                                         <td>
-                                            @if (product.StockQuantity <= product.MinimumStockLevel)
-                                            {
-                                                <span class="badge bg-warning">Low Stock</span>
-                                            }
-                                            else if (product.StockQuantity == 0)
-                                            {
-                                                <span class="badge bg-danger">Out of Stock</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-success">In Stock</span>
-                                            }
+                                            <div class="d-flex align-items-center">
+                                                <div class="product-icon bg-light rounded p-2 me-3">
+                                                    <i class="fas fa-box text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">@product.Name</h6>
+                                                    <small class="text-muted">@product.SKU</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@product.Category?.Name</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <span class="me-2">@product.StockQuantity</span>
+                                                <div class="progress flex-grow-1" style="height: 6px;">
+                                                    @{
+                                                        var stockPercent = product.MinimumStockLevel > 0 ? 
+                                                            (product.StockQuantity * 100) / (product.MinimumStockLevel * 2) : 100;
+                                                        stockPercent = Math.Min(stockPercent, 100);
+                                                    }
+                                                    <div class="progress-bar bg-@statusColor" style="width: @stockPercent%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="fw-bold">@product.SellingPrice.ToString("C")</td>
+                                        <td>
+                                            <span class="badge bg-@statusColor">@stockStatus Stock</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a asp-controller="SalesOrders" asp-action="Create" 
+                                                   asp-route-productId="@product.ProductId" 
+                                                   class="btn btn-outline-success" title="Sell">
+                                                    <i class="fas fa-cash-register"></i>
+                                                </a>
+                                                <a asp-controller="Products" asp-action="Details" 
+                                                   asp-route-id="@product.ProductId" 
+                                                   class="btn btn-outline-info" title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 }
@@ -186,24 +285,53 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="col-xl-3 col-md-6 mb-4">
-    <div class="card border-left-success shadow h-100 py-2">
-        <div class="card-body">
-            <div class="row no-gutters align-items-center">
-                <div class="col mr-2">
-                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                        Quick Sales
-                    </div>
-                    <a asp-controller="SalesOrders" asp-action="Create" 
-                       class="btn btn-success btn-sm mt-2">
-                        <i class="fas fa-cash-register"></i> New Sale
-                    </a>
+        <!-- Quick Actions -->
+        <div class="col-xl-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt text-primary me-2"></i> Quick Actions
+                    </h5>
                 </div>
-                <div class="col-auto">
-                    <i class="fas fa-cash-register fa-2x text-gray-300"></i>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-controller="PurchaseOrders" asp-action="Create" 
+                           class="btn btn-outline-primary text-start py-3">
+                            <i class="fas fa-truck-loading me-2"></i>
+                            <div>
+                                <div class="fw-bold">Create Purchase Order</div>
+                                <small class="text-muted">Order from suppliers</small>
+                            </div>
+                        </a>
+                        
+                        <a asp-controller="StockMovements" asp-action="Create" 
+                           class="btn btn-outline-success text-start py-3">
+                            <i class="fas fa-exchange-alt me-2"></i>
+                            <div>
+                                <div class="fw-bold">Record Stock Movement</div>
+                                <small class="text-muted">Update inventory levels</small>
+                            </div>
+                        </a>
+                        
+                        <a asp-controller="Reports" asp-action="Inventory" 
+                           class="btn btn-outline-info text-start py-3">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            <div>
+                                <div class="fw-bold">View Inventory Report</div>
+                                <small class="text-muted">Stock analysis</small>
+                            </div>
+                        </a>
+                        
+                        <a asp-controller="Suppliers" asp-action="Create" 
+                           class="btn btn-outline-warning text-start py-3">
+                            <i class="fas fa-truck me-2"></i>
+                            <div>
+                                <div class="fw-bold">Add New Supplier</div>
+                                <small class="text-muted">Register vendor</small>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -224,28 +352,94 @@
                 datasets: [{
                     label: 'Sales ($)',
                     data: salesData,
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                    borderColor: 'rgba(78, 115, 223, 1)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                    pointBorderColor: 'rgba(78, 115, 223, 1)',
-                    pointHoverRadius: 5,
-                    lineTension: 0.4
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    borderColor: 'rgba(67, 97, 238, 1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(67, 97, 238, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    tension: 0.4,
+                    fill: true
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 14 },
+                        padding: 12,
+                        cornerRadius: 6
+                    }
+                },
                 scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
                     y: {
                         beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
                         ticks: {
+                            font: {
+                                size: 12
+                            },
                             callback: function(value) {
-                                return '$' + value;
+                                return '$' + value.toLocaleString();
                             }
                         }
                     }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 }
             }
         });
+
+        // Chart period switching
+        $('[data-period]').click(function() {
+            $('[data-period]').removeClass('active');
+            $(this).addClass('active');
+            // Here you would typically fetch new data for the selected period
+        });
+
+        // Refresh dashboard function
+        function refreshDashboard() {
+            const btn = event.currentTarget;
+            const icon = btn.querySelector('i');
+            const originalClass = icon.className;
+            
+            icon.className = 'fas fa-spinner fa-spin';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                icon.className = originalClass;
+                btn.disabled = false;
+                // In a real app, you would reload data here
+                location.reload();
+            }, 1000);
+        }
+        
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            // Uncomment to enable auto-refresh
+            // location.reload();
+        }, 300000);
     </script>
 }

@@ -30,9 +30,12 @@
                                     <label asp-for="ProductId" class="control-label">Product *</label>
                                     <select asp-for="ProductId" class="form-control" required>
                                         <option value="">-- Select Product --</option>
-                                        @foreach (var product in products)
+                                        @if (products != null)
                                         {
-                                            <option value="@product.ProductId">@product.Name (@product.SKU) - Stock: @product.StockQuantity</option>
+                                            @foreach (var product in products)
+                                            {
+                                                <option value="@product.ProductId">@product.Name (@product.SKU) - Stock: @product.StockQuantity</option>
+                                            }
                                         }
                                     </select>
                                     <span asp-validation-for="ProductId" class="text-danger"></span>
@@ -44,9 +47,12 @@
                                     <label asp-for="MovementType" class="control-label">Movement Type *</label>
                                     <select asp-for="MovementType" class="form-control" required>
                                         <option value="">-- Select Type --</option>
-                                        @foreach (var type in movementTypes)
+                                        @if (movementTypes != null)
                                         {
-                                            <option value="@type">@type</option>
+                                            @foreach (var type in movementTypes)
+                                            {
+                                                <option value="@type">@type</option>
+                                            }
                                         }
                                     </select>
                                     <span asp-validation-for="MovementType" class="text-danger"></span>
