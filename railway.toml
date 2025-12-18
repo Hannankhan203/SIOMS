@@ -1,16 +1,8 @@
 [build]
 builder = "nixpacks"
-buildCommand = "rm -f NuGet.Config && echo '<?xml version=\"1.0\"?><configuration><packageSources><clear/><add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\"/></packageSources></configuration>' > NuGet.Config && dotnet restore && dotnet publish -c Release -o out"
 
 [start]
 command = "cd out && ASPNETCORE_URLS=http://+:$PORT dotnet SIOMS.dll"
 
 [deploy]
-healthcheckPath = "/"
-healthcheckTimeout = 30
-healthcheckInterval = 15
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
-
-[variables]
-ASPNETCORE_ENVIRONMENT = "Production"
+healthcheckPath = ""
