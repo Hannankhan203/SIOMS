@@ -1,17 +1,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-WORKDIR /app
+WORKDIR /src
 
-# Create SIOMS directory first
-RUN mkdir -p SIOMS
+# Copy ALL files from current directory (including .csproj and .sln)
+COPY . .
 
-# Copy solution file
-COPY *.sln .
+# Remove any Windows NuGet configs
+RUN find . -name "NuGet.Config" -o -name "nuget.config" -delete 2>/dev/null || true
 
-# Copy csproj file to correct location
-COPY SIOMS.csproj ./SIOMS/  
-
-# Create clean NuGet config
+# Create clean Linux NuGet config
 RUN echo '<?xml version="1.0" encoding="utf-8"?> \
 <configuration> \
   <packageSources> \
@@ -21,21 +18,16 @@ RUN echo '<?xml version="1.0" encoding="utf-8"?> \
   <fallbackPackageFolders> \
     <clear /> \
   </fallbackPackageFolders> \
-</configuration>' > /app/NuGet.Config
+</configuration>' > NuGet.Config
 
-# Restore packages
-RUN dotnet restore --configfile /app/NuGet.Config
+# Restore and build
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish
 
-# Copy everything else
-COPY . .
-
-# Build and publish
-RUN dotnet publish SIOMS/SIOMS.csproj -c Release -o out
-
-# Runtime image
+# Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/out .
+COPY --from=build /app/publish .
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 ENTRYPOINT ["dotnet", "SIOMS.dll"]

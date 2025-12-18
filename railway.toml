@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+
+[start]
+command = "cd out && dotnet SIOMS.dll"
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 300
