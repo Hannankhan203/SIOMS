@@ -5894,6 +5894,7 @@
       "outputPath": "D:\\Advanced Programming Project\\SIOMS\\SIOMS\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
+        "D:\\Advanced Programming Project\\SIOMS\\SIOMS\\NuGet.Config",
         "C:\\Users\\Abdul Hannan Khan\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -5902,7 +5903,6 @@
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
