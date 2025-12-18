@@ -13,9 +13,6 @@
         "packagesPath": "C:\\Users\\Abdul Hannan Khan\\.nuget\\packages\\",
         "outputPath": "D:\\Advanced Programming Project\\SIOMS\\SIOMS\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
           "C:\\Users\\Abdul Hannan Khan\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
@@ -92,7 +89,7 @@
               "version": "[8.0.22, 8.0.22]"
             },
             {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "name": "Microsoft.NETCore.App.Host.linux-x64",
               "version": "[8.0.22, 8.0.22]"
             },
             {
@@ -113,6 +110,11 @@
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "linux-x64": {
+          "#import": []
         }
       }
     }
