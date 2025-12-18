@@ -2,16 +2,18 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 WORKDIR /app
 
-# Copy project files
-COPY *.sln .
-COPY SIOMS/*.csproj ./SIOMS/
+# Create SIOMS directory first
+RUN mkdir -p SIOMS
 
-# Create clean NuGet config for Linux
+# Copy solution file
+COPY *.sln .
+
+# Copy csproj file to correct location
+COPY SIOMS.csproj ./SIOMS/  
+
+# Create clean NuGet config
 RUN echo '<?xml version="1.0" encoding="utf-8"?> \
 <configuration> \
-  <config> \
-    <add key="globalPackagesFolder" value="/app/packages" /> \
-  </config> \
   <packageSources> \
     <clear /> \
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" /> \
