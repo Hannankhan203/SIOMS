@@ -1,0 +1,11 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "./build.sh"
+  },
+  "deploy": {
+    "startCommand": "cd out && dotnet SIOMS.dll",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300
+  }
+}
